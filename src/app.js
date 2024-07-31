@@ -1,29 +1,25 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
-const Database = require("./config/Database")
-const errorHandler = require("./middlewares/erroHadler");
-const { model } = require("mongoose");
-
-dotenv.config()
+const express = require('express')
+const cors = require("cors")
 const app = express()
-Database()
 
-app.get("/", (res,req) =>{
-    res.statusCode(200).json({message: "listo"})
-})
+const userRouter = require('./routes/users.router')
+const postRouter = require ('./routes/post.router')
+const authRouter = require('./routes/auth.router')
+
 
 app.use(cors())
-app.use(express())
+app.use(express.json())
 
-app.use(require("./routes/authRouter"))
-app.use(require("./routes/postRouter"))
-app.use(require("./routes/useRouter"))
 
-app.use((req, res, next) =>{
-    res.status(404),json({message: "no se puede encontrar"})
+app.use('/user',userRouter)
+app.use('/posts',postRouter)
+app.use('/auth',authRouter)
+
+app.get('/', (req, res) => {
+    res.json({
+        message: 'User / Post APIv1'
+    })
 })
 
-app.use(errorHandler)
 
-model.export = app
+module.exports = app

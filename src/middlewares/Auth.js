@@ -1,18 +1,35 @@
-const jwt = require("jsonwebtoken")
-const createError = require("http-errors")
-
-module.exports = (req, res, next) => {
-
-    const token = req.header("Autorizando").replace("Portador", "")
-    if(!token){
-        return next(createError(401, "acceso denegado, token prohibido"))
+    //quinto
+    const createError = require("http-errors")
+    const userUseCase = require('../usecases/users.usecases')
+    const jwt = require('../lib/jwt')
+    
+    async function auth(req,res,next){
+        try {
+    
+            const  token = req.headers.authorization
+    
+            if(!token){
+                throw createError(401,"JWT is required")
+            }
+            
+            const payload = jwt.verify(token)
+            
+            const user = await userUseCase.getById(payload.id)
+    
+            req.user = user
+    
+            next()
+        } catch (error) {
+        
+            res.status(401)
+            res.json({
+                success: false,
+                error: error.message
+            })
+            
+        }
+    
     }
-
-    try{
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = decoded
-        next()
-    }catch(error){
-        next(createError(400, "invalido token"))
-    }
-}
+    
+    
+    module.exports = auth
